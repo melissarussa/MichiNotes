@@ -1,0 +1,1 @@
+"""QGraphicsView: zoom y desplazamiento."""

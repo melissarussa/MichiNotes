@@ -1,0 +1,1 @@
+"""Subventana del basurero."""

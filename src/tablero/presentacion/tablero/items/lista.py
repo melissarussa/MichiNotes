@@ -1,0 +1,1 @@
+"""Objeto gráfico: lista."""

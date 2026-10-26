@@ -1,0 +1,1 @@
+"""Repositorio SQLite de usuarios."""
