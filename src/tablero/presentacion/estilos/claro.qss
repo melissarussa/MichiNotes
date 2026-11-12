@@ -90,3 +90,16 @@ QMenu::separator{
   height: 1px;
 }
 
+QToolButton#herramienta {
+    color: #887C6E;
+}
+
+QToolButton#herramienta:hover {
+    background-color: #B1A996; 
+}
+
+QToolButton#herramienta:checked {
+    color: #e4dcca; 
+    background-color: #887C6E;
+}
+

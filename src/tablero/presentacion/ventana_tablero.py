@@ -6,6 +6,7 @@ from PySide6.QtGui import QKeySequence, QPixmap, QShortcut,QIcon
 from PySide6.QtWidgets import (QAbstractSpinBox, QApplication, QComboBox, QLineEdit, QPlainTextEdit, QButtonGroup, QFileDialog, QFrame, QHBoxLayout, QLabel, QMessageBox, QStackedWidget, QToolButton, QVBoxLayout, QWidget)
 
 from ..infraestructura.recursos import importar_imagen
+from ..config import ruta_recurso
 from .basurero import DialogoBasurero
 from .panel_opciones import PanelFiguras, PanelLienzo, PanelNotas, PanelPincel, PanelTexto
 from .tablero.escena import EscenaTablero
@@ -13,13 +14,13 @@ from .tablero.items.base import ItemBase
 from .tablero.vista import VistaTablero
 
 HERRAMIENTAS = [  # (id, símbolo, ayuda)
-    ("seleccionar", "↖", "Seleccionar / mover (V)"),
-    ("nota", "🗒", "Notas, listas y enlaces (N)"),
-    ("pincel", "🖌", "Pincel (B)"),
-    ("borrador", "⌫", "Borrador de trazos (E)"),
-    ("figura", "⬟", "Figuras (S)"),
-    ("imagen", "🖼", "Insertar imagen (I)"),
-    ("texto", "T", "Texto (T)"),
+    ("seleccionar", "hand-bold.svg", "Seleccionar / mover (V)"),
+    ("nota", "note-blank-bold.svg", "Notas, listas y enlaces (N)"),
+    ("pincel", "pencil-simple-line-bold.svg", "Pincel (B)"),
+    ("borrador", "eraser-bold.svg", "Borrador de trazos (E)"),
+    ("figura", "circle-bold.svg", "Figuras (S)"),
+    ("imagen", "images-square-bold.svg", "Insertar imagen (I)"),
+    ("texto", "text-t-bold.svg", "Texto (T)"),
 ]
 FORMATO_TEXTO = ("nota", "lista", "enlace", "texto")
 
@@ -53,9 +54,13 @@ class VentanaTablero(QWidget):
         self.grupo = QButtonGroup(self)
         self.grupo.setExclusive(True)
         self.botones = {}
-        for hid, simbolo, ayuda in HERRAMIENTAS:
+        
+        # 1. Herramientas del lienzo (V, N, B, E, S, I, T)
+        for hid, archivo_icono, ayuda in HERRAMIENTAS:
             b = QToolButton()
-            b.setText(simbolo)
+            # NUEVO: Cargamos el ícono SVG
+            b.setIcon(QIcon(ruta_recurso("iconos", archivo_icono)))
+            b.setIconSize(QSize(20, 20))  # Tamaño del ícono
             b.setToolTip(ayuda)
             b.setCheckable(hid != "imagen")
             b.setObjectName("herramienta")
@@ -64,27 +69,43 @@ class VentanaTablero(QWidget):
             b.clicked.connect(lambda _=False, i=hid: self.cambiar_herramienta(i))
             h.addWidget(b)
             self.botones[hid] = b
-        for simbolo, ayuda, f in (("↶", "Deshacer (Ctrl+Z)", lambda: self.ctx.historial.deshacer()),
-                                  ("↷", "Rehacer (Ctrl+Y)", lambda: self.ctx.historial.rehacer()),
-                                  ("🗑", "Papelera del tablero", self.abrir_basurero)):
+            
+        # 2. Deshacer, Rehacer y Papelera
+        # Asumí que tus archivos se llaman así. Cambia los nombres si los tuyos son distintos.
+        acciones_historial = (
+            ("arrow-arc-left-bold.svg", "Deshacer (Ctrl+Z)", lambda: self.ctx.historial.deshacer()),
+            ("arrow-arc-right-bold.svg", "Rehacer (Ctrl+Y)", lambda: self.ctx.historial.rehacer()),
+            ("trash-simple-bold.svg", "Papelera del tablero", self.abrir_basurero)
+        )
+        
+        for archivo_icono, ayuda, f in acciones_historial:
             b = QToolButton()
-            b.setText(simbolo)
+            b.setIcon(QIcon(ruta_recurso("iconos", archivo_icono)))
+            b.setIconSize(QSize(20, 20))
             b.setToolTip(ayuda)
             b.setObjectName("herramienta")
             b.clicked.connect(f)
             h.addWidget(b)
-            if simbolo == "↶":
+            # Guardamos las referencias para que _estado_historial() active/desactive los botones
+            if "left" in archivo_icono:
                 self.b_des = b
-            elif simbolo == "↷":
+            elif "right" in archivo_icono:
                 self.b_reh = b
+                
+        # 3. Zoom
         self.lbl_zoom = QLabel("100%")
         self.lbl_zoom.setToolTip("Ctrl + rueda para hacer zoom")
         h.addWidget(self.lbl_zoom)
+        
+        # 4. Botón de los tres puntitos (Menú)
         menu = QToolButton()
-        menu.setIcon
+        # NUEVO: Envolvemos la ruta en QIcon()
+        menu.setIcon(QIcon(ruta_recurso("iconos", "dots-three-outline-bold.svg")))
+        menu.setIconSize(QSize(20, 20))
         menu.setObjectName("herramienta")
         menu.clicked.connect(lambda: self.menu_global().exec(menu.mapToGlobal(menu.rect().topLeft())))
         h.addWidget(menu)
+        
         self.vista.zoom_cambiado.connect(lambda z: self.lbl_zoom.setText(f"{int(z * 100)}%"))
         self._estado_historial()
 

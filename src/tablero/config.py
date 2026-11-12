@@ -3,7 +3,7 @@ nunca junto al ejecutable (con PyInstaller --onefile esa carpeta es temporal).""
 import os
 from pathlib import Path
 
-NOMBRE_APP = "TableroDigital"
+NOMBRE_APP = "MichiNotes"
 
 def ruta_recurso(subcarpeta: str, nombre_archivo: str) -> str:
     # Esta funcion devuelve la ruta absoluta a un archivo dentro de la carpeta recursos
