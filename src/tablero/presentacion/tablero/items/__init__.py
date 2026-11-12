@@ -1,1 +1,0 @@
-"""Paquete presentacion/tablero/items."""

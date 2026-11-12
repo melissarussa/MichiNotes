@@ -1,1 +1,20 @@
-/* Estilos del tema claro (QSS) */
+QWidget { font-size: 13px; color: #2B2B2B; }
+QMainWindow, QDialog, QStackedWidget > QWidget { background: #F3EFE8; }
+QToolBar { background: #D9D0C1; border: none; spacing: 6px; padding: 4px; }
+QToolBar QToolButton { padding: 6px 12px; border-radius: 8px; }
+QToolBar QToolButton:hover, QToolButton#herramienta:hover { background: #C9BEAA; }
+QPushButton { background: #D9D0C1; border: none; border-radius: 8px; padding: 6px 12px; }
+QPushButton:hover { background: #C9BEAA; }
+QPushButton:checked { background: #A89B84; color: white; }
+QLineEdit, QPlainTextEdit, QListWidget, QTableWidget, QComboBox, QSpinBox, QDateEdit, QTimeEdit {
+  background: white; border: 1px solid #CFC6B6; border-radius: 6px; padding: 3px; }
+QListWidget::item:selected, QTableWidget::item:selected { background: #BCAE96; color: black; }
+QHeaderView::section { background: #E6DFD2; border: none; padding: 4px; }
+QLabel#tituloPanel { font-size: 16px; font-weight: bold; padding: 4px 0; }
+QFrame#barraFlotante, QFrame#panelFlotante { background: rgba(190,178,157,235); border-radius: 18px; }
+QFrame#panelFlotante QLabel { background: transparent; }
+QToolButton#herramienta { font-size: 18px; min-width: 38px; min-height: 34px; border: none; border-radius: 10px;
+  background: transparent; color: #4A4234; }
+QToolButton#herramienta:checked { background: #8C7F68; color: white; }
+QToolButton#herramienta:disabled { color: #9A917F; }
+QLabel { background: transparent; }

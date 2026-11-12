@@ -1,10 +1,8 @@
 __pycache__/
 *.pyc
-venv/
-.venv/
-data/*.db
-data/*.db-wal
-data/*.db-shm
+data/*.db*
+data/recursos/
 dist/
 build/
 *.spec
+.venv/
