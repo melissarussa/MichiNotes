@@ -1,8 +1,8 @@
 """Pantalla del tablero: lienzo + barra flotante inferior (como el mockup) + panel de opciones flotante."""
 from pathlib import Path
 
-from PySide6.QtCore import QPointF, Qt
-from PySide6.QtGui import QKeySequence, QPixmap, QShortcut
+from PySide6.QtCore import QPointF, Qt,QSize
+from PySide6.QtGui import QKeySequence, QPixmap, QShortcut,QIcon
 from PySide6.QtWidgets import (QAbstractSpinBox, QApplication, QComboBox, QLineEdit, QPlainTextEdit, QButtonGroup, QFileDialog, QFrame, QHBoxLayout, QLabel, QMessageBox, QStackedWidget, QToolButton, QVBoxLayout, QWidget)
 
 from ..infraestructura.recursos import importar_imagen
@@ -81,7 +81,7 @@ class VentanaTablero(QWidget):
         self.lbl_zoom.setToolTip("Ctrl + rueda para hacer zoom")
         h.addWidget(self.lbl_zoom)
         menu = QToolButton()
-        menu.setText("☰")
+        menu.setIcon
         menu.setObjectName("herramienta")
         menu.clicked.connect(lambda: self.menu_global().exec(menu.mapToGlobal(menu.rect().topLeft())))
         h.addWidget(menu)

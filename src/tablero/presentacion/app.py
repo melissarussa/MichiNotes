@@ -109,26 +109,28 @@ class VentanaPrincipal(QMainWindow):
         accion_tableros = QAction(QIcon(ruta_recurso("iconos", "chalkboard-simple-bold.svg")), "Panel de trabajo", self)
         accion_tableros.triggered.connect(self.ver_tableros)
         m.addAction(accion_tableros)
-
-        accion_calendario = QAction(QIcon(ruta_recurso("iconos","calendar-dots-bold.svg")),"Calendario",self)
-        accion_calendario.triggered.connect(self.ver_tableros)
-        m.addAction
+        accion_calendario = QAction(QIcon(ruta_recurso("iconos","calendar-dots-bold.svg")),"Calendario", self)
+        accion_calendario.triggered.connect(self.ver_calendario)
+        m.addAction(accion_calendario)
+        accion_widget = QAction(QIcon(ruta_recurso("iconos", "note-pencil-bold.svg")),"Nuevo Widget", self)
+        accion_widget.triggered.connect(self.nuevo_widget_notas)
+        m.addAction(accion_widget)
+        accion_guardar = QAction(QIcon(ruta_recurso("iconos","floppy-disk-bold.svg")),"Guardar", self)
+        accion_guardar.triggered.connect(self.hacer_respaldo)
+        m.addAction(accion_guardar)
+        accion_restaurar = QAction(QIcon(ruta_recurso("iconos","recycle-bold.svg")),"Restaurar guardado", self)
+        accion_restaurar.triggered.connect(self.restaurar_respaldo)
+        m.addAction(accion_restaurar)
+        m.addSeparator()
+        accion_atajos = QAction(QIcon(ruta_recurso("iconos","keyboard-bold.svg")),"Atajos de teclado", self)
+        accion_atajos.triggered.connect(lambda: QDesktopServices.openUrl(QUrl.fromLocalFile(str(self.ctx.carpeta_datos))))
+        m.addAction(accion_atajos)
+        accion_salir = QAction(QIcon(ruta_recurso("iconos","power-bold.svg")),"Salir", self)
+        accion_salir.triggered.connect(self.close)
+        m.addAction(accion_salir)
 
         return m
-    #def crear_menu(self) -> QMenu:
-    #   m = QMenu(self)
-    #  m.addAction("","Panel de trabajo", self.ver_tableros)
-    # m.addAction("📅 Calendario", self.ver_calendario)
-    #m.addSeparator()
-    #m.addAction("📝 Nuevo widget de notas", self.nuevo_widget_notas)
-    #m.addAction("💾 Hacer respaldo", self.hacer_respaldo)
-    #m.addAction("♻ Restaurar respaldo…", self.restaurar_respaldo)
-    #m.addAction("📂 Abrir carpeta de datos", lambda: QDesktopServices.openUrl(QUrl.fromLocalFile(str(self.ctx.carpeta_datos))))
-    #m.addSeparator()
-    #m.addAction("⌨ Atajos de teclado", lambda: QMessageBox.information(self, "Atajos", ATAJOS))
-    #m.addAction("Salir", self.close)
-    #return m
-
+    
     # ---- respaldo
     def hacer_respaldo(self):
         destino, _ = QFileDialog.getSaveFileName(self, "Guardar respaldo",
