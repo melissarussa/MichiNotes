@@ -245,3 +245,11 @@ def test_migracion_002_conserva_usuarios_existentes(tmp_path):
     migrador.migrar(c)
     assert c.execute("PRAGMA user_version").fetchone()[0] == 2
     assert RepoUsuarios(c).por_nombre("vieja")[0].id == "1"
+
+
+def test_girar_figura_se_guarda_y_se_deshace(servicio, tablero):
+    e = servicio.crear(nuevo_elemento("figura", tablero.id, 0, 0, forma="flecha"))
+    servicio.editar_propiedades(e.id, rotacion=90)
+    assert servicio.repo.obtener(e.id).propiedades["rotacion"] == 90
+    servicio.historial.deshacer()
+    assert "rotacion" not in servicio.repo.obtener(e.id).propiedades

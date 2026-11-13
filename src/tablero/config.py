@@ -1,13 +1,15 @@
 """Rutas y constantes. Los datos van en la carpeta de datos del usuario,
 nunca junto al ejecutable (con PyInstaller --onefile esa carpeta es temporal)."""
 import os
+import sys
 from pathlib import Path
 
 NOMBRE_APP = "MichiNotes"
 
 def ruta_recurso(subcarpeta: str, nombre_archivo: str) -> str:
     # Esta funcion devuelve la ruta absoluta a un archivo dentro de la carpeta recursos
-    raiz_proyecto = Path(__file__).resolve().parent.parent.parent 
+    # empaquetado con PyInstaller los recursos quedan en sys._MEIPASS
+    raiz_proyecto = Path(getattr(sys, "_MEIPASS", None) or Path(__file__).resolve().parent.parent.parent)
     ruta = raiz_proyecto / "recursos" / subcarpeta / nombre_archivo
     return str(ruta)
 

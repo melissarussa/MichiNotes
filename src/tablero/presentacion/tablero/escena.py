@@ -196,6 +196,12 @@ class EscenaTablero(QGraphicsScene):
             self.ctx.servicio.mover_varios(mov)
         self._posiciones = {}
 
+    def girar_seleccion(self, grados: float) -> None:
+        """Gira las figuras seleccionadas (grados > 0: hacia la derecha)."""
+        for it in self.items_tablero():
+            if it.girable and not it.e.bloqueado:
+                self.ctx.servicio.editar_propiedades(it.e.id, rotacion=(float(it.p.get("rotacion", 0)) + grados) % 360)
+
     def _props_pincel(self) -> dict:
         p = self.opciones.get("pincel", {})
         return {"color": p.get("color", "#222222"), "grosor": p.get("grosor", 4), "estilo": p.get("estilo", "duro")}
@@ -223,6 +229,10 @@ class EscenaTablero(QGraphicsScene):
             sel = self.items_tablero()
             if len(sel) == 1 and not isinstance(item, ItemDibujo):
                 menu.addAction("Editar…", item.editar)
+            if item.girable and not item.e.bloqueado:
+                menu.addAction("Girar 90° a la derecha", lambda: self.girar_seleccion(90))
+                menu.addAction("Girar 90° a la izquierda", lambda: self.girar_seleccion(-90))
+                menu.addAction("Quitar giro", lambda: [srv.editar_propiedades(i.e.id, rotacion=0) for i in sel if i.girable])
             menu.addAction("Duplicar", lambda: [srv.duplicar(i.e.id) for i in sel])
             menu.addAction("Traer al frente", lambda: [srv.traer_al_frente(i.e.id) for i in sel])
             menu.addAction("Enviar al fondo", lambda: [srv.enviar_al_fondo(i.e.id) for i in sel])
@@ -237,6 +247,9 @@ class EscenaTablero(QGraphicsScene):
         ev.accept()
 
     def mouseDoubleClickEvent(self, ev) -> None:
+        if self.herramienta == "mano":      # con la Mano no se edita ni se crea nada
+            ev.accept()
+            return
         if self.herramienta == "seleccionar" and self.itemAt(ev.scenePos(), __import__("PySide6.QtGui", fromlist=["QTransform"]).QTransform()) is None:
             self.crear_con_herramienta("nota", ev.scenePos())
             ev.accept()

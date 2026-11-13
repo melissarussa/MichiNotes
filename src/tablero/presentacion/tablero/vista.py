@@ -15,6 +15,8 @@ class VistaTablero(QGraphicsView):
         self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self._zoom = 1.0
         self._pan = None
+        self._cursor_antes = None
+        self.modo_mano = False        # herramienta Mano: el botón izquierdo mueve la vista
         self.centerOn(0, 0)
 
     def poner_zoom(self, z: float) -> None:
@@ -31,11 +33,13 @@ class VistaTablero(QGraphicsView):
         else:
             super().wheelEvent(ev)
 
-    # el botón del medio mueve el lienzo
+    # el botón del medio (o el izquierdo con la herramienta Mano) mueve el lienzo sin tocar los elementos
     def mousePressEvent(self, ev) -> None:
-        if ev.button() == Qt.MouseButton.MiddleButton:
+        if ev.button() == Qt.MouseButton.MiddleButton or (self.modo_mano and ev.button() == Qt.MouseButton.LeftButton):
             self._pan = ev.position().toPoint()
-            self.setCursor(Qt.CursorShape.ClosedHandCursor)
+            self._boton_pan = ev.button()
+            self._cursor_antes = self.viewport().cursor()
+            self.viewport().setCursor(Qt.CursorShape.ClosedHandCursor)
             ev.accept()
             return
         super().mousePressEvent(ev)
@@ -51,9 +55,10 @@ class VistaTablero(QGraphicsView):
         super().mouseMoveEvent(ev)
 
     def mouseReleaseEvent(self, ev) -> None:
-        if self._pan is not None and ev.button() == Qt.MouseButton.MiddleButton:
+        if self._pan is not None and ev.button() == self._boton_pan:
             self._pan = None
-            self.unsetCursor()
+            if self._cursor_antes is not None:
+                self.viewport().setCursor(self._cursor_antes)
             ev.accept()
             return
         super().mouseReleaseEvent(ev)

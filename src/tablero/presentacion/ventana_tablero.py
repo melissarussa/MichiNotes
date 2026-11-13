@@ -14,7 +14,8 @@ from .tablero.items.base import ItemBase
 from .tablero.vista import VistaTablero
 
 HERRAMIENTAS = [  # (id, símbolo, ayuda)
-    ("seleccionar", "hand-bold.svg", "Seleccionar / mover (V)"),
+    ("seleccionar", "cursor-bold.svg", "Seleccionar / mover (V)"),
+    ("mano", "hand-bold.svg", "Mano: mover la vista sin tocar los elementos (H)"),
     ("nota", "note-blank-bold.svg", "Notas, listas y enlaces (N)"),
     ("pincel", "pencil-simple-line-bold.svg", "Pincel (B)"),
     ("borrador", "eraser-bold.svg", "Borrador de trazos (E)"),
@@ -137,6 +138,7 @@ class VentanaTablero(QWidget):
         self.p_notas.color_cambiado.connect(self._color_nota)
         self.p_pincel.cambiado.connect(lambda d: self.opciones.update(pincel=d))
         self.p_figuras.cambiado.connect(lambda d: self.opciones.update(figura=d))
+        self.p_figuras.girar.connect(self.escena.girar_seleccion)
         self.p_texto.cambiado.connect(self._formato_texto)
         self.p_lienzo.estilo_cambiado.connect(lambda v: self._config_lienzo(lienzo=v))
         self.p_lienzo.fondo_cambiado.connect(lambda v: self._config_lienzo(fondo=v))
@@ -149,19 +151,33 @@ class VentanaTablero(QWidget):
         a("Ctrl+Y", lambda: self.ctx.historial.rehacer())
         a("Ctrl+Shift+Z", lambda: self.ctx.historial.rehacer())
         a("Ctrl+D", self._duplicar)
-        a("Delete", self._eliminar_seleccion)
+        a("Delete", self._atajo_borrar)
+        a("Backspace", self._atajo_borrar)      # la tecla "borrar" del teclado
+        a("R", lambda: self._atajo_girar(90))
+        a("Shift+R", lambda: self._atajo_girar(-90))
         a("Ctrl+0", lambda: self.vista.poner_zoom(1.0))
         a("Ctrl+A", lambda: [i.setSelected(True) for i in self.escena.items() if isinstance(i, ItemBase)])
         a("Escape", lambda: (self.escena.clearSelection(), self.cambiar_herramienta("seleccionar")))
-        for tecla, hid in (("V", "seleccionar"), ("N", "nota"), ("B", "pincel"), ("E", "borrador"),
+        for tecla, hid in (("V", "seleccionar"), ("H", "mano"), ("N", "nota"), ("B", "pincel"), ("E", "borrador"),
                            ("S", "figura"), ("I", "imagen"), ("T", "texto")):
             a(tecla, lambda h=hid: self._atajo_herramienta(h))
 
+    @staticmethod
+    def _escribiendo() -> bool:
+        return isinstance(QApplication.focusWidget(), (QLineEdit, QAbstractSpinBox, QComboBox, QPlainTextEdit))
+
     def _atajo_herramienta(self, hid: str):
         # no cambiar de herramienta si la persona está escribiendo en un campo
-        if isinstance(QApplication.focusWidget(), (QLineEdit, QAbstractSpinBox, QComboBox, QPlainTextEdit)):
-            return
-        self.cambiar_herramienta(hid)
+        if not self._escribiendo():
+            self.cambiar_herramienta(hid)
+
+    def _atajo_borrar(self):
+        if not self._escribiendo():       # Retroceso/Supr dentro de un campo de texto borran texto, no elementos
+            self._eliminar_seleccion()
+
+    def _atajo_girar(self, grados: float):
+        if not self._escribiendo():
+            self.escena.girar_seleccion(grados)
 
     # ---------- comportamiento
     def abrir_tablero(self, tablero_id: str):
@@ -184,10 +200,14 @@ class VentanaTablero(QWidget):
         self.escena.herramienta = hid_escena
         if hid in self.botones and self.botones[hid].isCheckable():
             self.botones[hid].setChecked(True)
+        self.vista.modo_mano = hid == "mano"
         self.vista.setDragMode(self.vista.DragMode.RubberBandDrag if hid == "seleccionar"
                                else self.vista.DragMode.NoDrag)
-        self.vista.viewport().setCursor(Qt.CursorShape.ArrowCursor if hid == "seleccionar"
-                                        else Qt.CursorShape.CrossCursor)
+        if hid == "mano":
+            cursor = Qt.CursorShape.OpenHandCursor
+        else:
+            cursor = Qt.CursorShape.ArrowCursor if hid == "seleccionar" else Qt.CursorShape.CrossCursor
+        self.vista.viewport().setCursor(cursor)
         pagina = self.paginas.get(hid)
         self.panel.setVisible(pagina is not None)
         if pagina is not None:

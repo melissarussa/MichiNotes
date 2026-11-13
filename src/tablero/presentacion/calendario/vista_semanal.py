@@ -18,7 +18,8 @@ def _boton(texto: str, icono: str) -> QPushButton:
 
 
 DIAS = ["LUN", "MAR", "MIÉ", "JUE", "VIE", "SÁB", "DOM"]
-H0, H1 = 8, 18      # horas visibles (8:00 a 18:59)
+H0, H1 = 0, 23      # horas visibles (0:00 a 23:59: todo el día)
+H_INICIAL = 7       # al abrir, la vista se desplaza hasta esta hora
 
 
 def lunes_de(d: date) -> date:
@@ -78,16 +79,25 @@ class VistaSemanal(QWidget):
         self.tabla = QTableWidget(H1 - H0 + 1, 7)
         self.tabla.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         self.tabla.setSelectionMode(QAbstractItemView.SelectionMode.NoSelection)
-        self.tabla.setVerticalHeaderLabels([f"{h if h <= 12 else h - 12} {'AM' if h < 12 else 'PM'}"
+        self.tabla.setVerticalHeaderLabels([f"{h % 12 or 12} {'AM' if h < 12 else 'PM'}"
                                             for h in range(H0, H1 + 1)])
         self.tabla.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
-        self.tabla.verticalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        # 24 filas no caben "estiradas": altura fija por hora y barra de desplazamiento vertical
+        self.tabla.verticalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Fixed)
+        self.tabla.verticalHeader().setDefaultSectionSize(64)
         self.tabla.cellDoubleClicked.connect(self._doble_clic)
         
         # -----------------------
 
         der.addWidget(self.tabla, 1)
         self.refrescar()
+        self._desplazado = False
+
+    def showEvent(self, ev):
+        super().showEvent(ev)
+        if not self._desplazado:       # la primera vez que se muestra, ir a las 7 AM (la tabla ya tiene tamaño)
+            self._desplazado = True
+            self.tabla.verticalScrollBar().setValue(H_INICIAL * self.tabla.verticalHeader().defaultSectionSize())
 
     # ---- navegación
     def mover(self, dias: int):

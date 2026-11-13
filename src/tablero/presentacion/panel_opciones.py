@@ -246,6 +246,7 @@ class PanelTexto(QWidget):
 
 class PanelFiguras(QWidget):
     cambiado = Signal(dict)
+    girar = Signal(float)         # grados a girar las figuras seleccionadas (+ = derecha)
 
     ICONOS = {"rectangulo": "rectangle-bold.svg", "elipse": "circle-bold.svg", "triangulo": "triangle-bold.svg",
               "rombo": "diamond-bold.svg", "linea": "line-segment-bold.svg", "flecha": "arrow-down-right-bold.svg"}
@@ -281,7 +282,17 @@ class PanelFiguras(QWidget):
         self.grosor = _selector([1, 2, 3, 4, 6, 8, 12, 16, 20], 2)
         self.grosor.currentIndexChanged.connect(lambda _: self._set(grosor=self.grosor.currentData()))
         lay.addWidget(_fila("Grosor", self.grosor))
-        lay.addWidget(QLabel("Clic en el lienzo para colocarla."))
+        izq = _ficha("arrow-arc-left-bold.svg", "Girar 90° a la izquierda (Shift+R)", marcable=False, mini=True)
+        der = _ficha("arrow-arc-right-bold.svg", "Girar 90° a la derecha (R)", marcable=False, mini=True)
+        izq.clicked.connect(lambda: self.girar.emit(-90))
+        der.clicked.connect(lambda: self.girar.emit(90))
+        giro = QWidget()
+        hg = QHBoxLayout(giro)
+        hg.setContentsMargins(0, 0, 0, 0)
+        hg.addWidget(izq)
+        hg.addWidget(der)
+        lay.addWidget(_fila("Girar", giro))
+        lay.addWidget(QLabel("Clic en el lienzo para colocarla. Para girar una figura, arrastra el círculo que aparece sobre ella."))
         lay.addStretch()
 
     def _set(self, **kw):

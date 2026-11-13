@@ -9,6 +9,8 @@ FORMAS = ("rectangulo", "elipse", "triangulo", "rombo", "linea", "flecha")
 
 
 class ItemFigura(ItemBase):
+    girable = True
+
     def dibujar(self, painter) -> None:
         g = float(self.p.get("grosor", 2))
         pen = QPen(QColor(self.p.get("borde", "#333333")), g)

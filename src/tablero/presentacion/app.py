@@ -23,10 +23,11 @@ from .ventana_tablero import VentanaTablero
 from .widgets_escritorio import WidgetNota
 
 ATAJOS = """<b>Atajos de teclado</b><br><br>
-V seleccionar · N notas · B pincel · E borrador · S figuras · I imagen · T texto<br>
-Ctrl+Z deshacer · Ctrl+Y rehacer · Ctrl+D duplicar · Supr eliminar · Ctrl+A seleccionar todo<br>
+V seleccionar · H mano (mover la vista) · N notas · B pincel · E borrador · S figuras · I imagen · T texto<br>
+Ctrl+Z deshacer · Ctrl+Y rehacer · Ctrl+D duplicar · Supr / Retroceso eliminar · Ctrl+A seleccionar todo<br>
 Ctrl+rueda zoom · Ctrl+0 zoom 100% · botón del medio: mover el lienzo<br>
 Doble clic en vacío: nueva nota · clic derecho: menú del elemento<br>
+R / Shift+R: girar la figura 90° · arrastrar el círculo sobre una figura: girar libre (Shift: de 15° en 15°)<br>
 Esc: volver a seleccionar"""
 
 
