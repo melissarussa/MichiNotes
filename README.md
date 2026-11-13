@@ -9,14 +9,14 @@ python -m venv .venv
 pip install -r requirements.txt
 python main.py
 ```
-La primera vez crea tu usuario. Los datos quedan en la carpeta de datos del usuario
+La primera vez aparece "Crear cuenta" (usuario, correo y contraseña) y se muestra un código de recuperación: guárdalo, es la forma de restablecer la contraseña ("¿olvidó su contraseña?"). Los datos quedan en la carpeta de datos del usuario
 (menú ☰ → "Abrir carpeta de datos"), no en el proyecto.
 
 ## Pruebas (sin interfaz)
 `pytest -q`
 
 ## Qué incluye
-Login · panel de tableros (crear/buscar/renombrar/eliminar/restaurar) · lienzo con zoom y cuadrícula/puntos/liso ·
+Login (correo o usuario) · crear cuenta · recuperar contraseña · panel de tableros (crear/buscar/renombrar/eliminar/restaurar) · lienzo con zoom y cuadrícula/puntos/liso ·
 notas, listas con casillas, enlaces, texto, figuras, pincel (4 tipos), borrador, imágenes · formato de texto ·
 capas (frente/fondo), bloqueo, duplicar · papelera + deshacer/rehacer · calendario semanal con avisos ·
 widget de notas de escritorio · respaldo/restauración.

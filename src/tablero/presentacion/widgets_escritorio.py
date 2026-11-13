@@ -1,6 +1,8 @@
 """Widget de notas: ventanita sin bordes, siempre visible, que guarda su texto y posición."""
-from PySide6.QtCore import Qt, QTimer
+from PySide6.QtCore import QSize, Qt, QTimer
 from PySide6.QtWidgets import QHBoxLayout, QLabel, QPlainTextEdit, QPushButton, QVBoxLayout, QWidget
+
+from . import iconos
 
 
 class WidgetNota(QWidget):
@@ -8,16 +10,23 @@ class WidgetNota(QWidget):
         super().__init__(parent)
         self.datos, self._guardar, self._cerrar = datos, guardar, cerrar
         self.setWindowFlags(Qt.WindowType.Tool | Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint)
-        self.setStyleSheet("QWidget{background:#FFF59D;color:#222;} QPlainTextEdit{border:none;font-size:13px;}"
-                           "QPushButton{border:none;background:transparent;font-size:14px;}")
+        self.setStyleSheet("QWidget{background:#FFF59D;color:#222;} QPlainTextEdit{border:none;background:transparent;}"
+                           "QPushButton{border:none;background:transparent;padding:0;min-height:0;}"
+                           "QLabel{background:transparent;}")
         self.resize(220, 200)
         self.move(datos.get("x", 80), datos.get("y", 80))
         lay = QVBoxLayout(self)
         lay.setContentsMargins(6, 4, 6, 6)
         fila = QHBoxLayout()
-        fila.addWidget(QLabel("📝 Nota"))
+        ic = QLabel()
+        ic.setPixmap(iconos.pixmap("note-pencil-bold.svg", iconos.COLOR_ICONO).scaled(
+            20, 20, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
+        fila.addWidget(ic)
+        fila.addWidget(QLabel("Nota"))
         fila.addStretch()
-        x = QPushButton("✕")
+        x = QPushButton()
+        x.setIcon(iconos.icono("x-bold.svg"))
+        x.setIconSize(QSize(18, 18))
         x.clicked.connect(self._cerrar_widget)
         fila.addWidget(x)
         lay.addLayout(fila)

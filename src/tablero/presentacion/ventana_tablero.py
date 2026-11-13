@@ -1,12 +1,12 @@
 """Pantalla del tablero: lienzo + barra flotante inferior (como el mockup) + panel de opciones flotante."""
 from pathlib import Path
 
-from PySide6.QtCore import QPointF, Qt,QSize
-from PySide6.QtGui import QKeySequence, QPixmap, QShortcut,QIcon
-from PySide6.QtWidgets import (QAbstractSpinBox, QApplication, QComboBox, QLineEdit, QPlainTextEdit, QButtonGroup, QFileDialog, QFrame, QHBoxLayout, QLabel, QMessageBox, QStackedWidget, QToolButton, QVBoxLayout, QWidget)
+from PySide6.QtCore import QPointF, QSize, Qt
+from PySide6.QtGui import QKeySequence, QPixmap, QShortcut
+from PySide6.QtWidgets import (QAbstractSpinBox, QApplication, QComboBox, QLineEdit, QPlainTextEdit, QButtonGroup, QFileDialog, QFrame, QHBoxLayout, QLabel, QMessageBox, QScrollArea, QSizePolicy, QStackedWidget, QToolButton, QVBoxLayout, QWidget)
 
 from ..infraestructura.recursos import importar_imagen
-from ..config import ruta_recurso
+from . import iconos
 from .basurero import DialogoBasurero
 from .panel_opciones import PanelFiguras, PanelLienzo, PanelNotas, PanelPincel, PanelTexto
 from .tablero.escena import EscenaTablero
@@ -59,8 +59,8 @@ class VentanaTablero(QWidget):
         for hid, archivo_icono, ayuda in HERRAMIENTAS:
             b = QToolButton()
             # NUEVO: Cargamos el ícono SVG
-            b.setIcon(QIcon(ruta_recurso("iconos", archivo_icono)))
-            b.setIconSize(QSize(20, 20))  # Tamaño del ícono
+            b.setIcon(iconos.icono(archivo_icono))
+            b.setIconSize(QSize(26, 26))  # Tamaño del ícono
             b.setToolTip(ayuda)
             b.setCheckable(hid != "imagen")
             b.setObjectName("herramienta")
@@ -80,8 +80,8 @@ class VentanaTablero(QWidget):
         
         for archivo_icono, ayuda, f in acciones_historial:
             b = QToolButton()
-            b.setIcon(QIcon(ruta_recurso("iconos", archivo_icono)))
-            b.setIconSize(QSize(20, 20))
+            b.setIcon(iconos.icono(archivo_icono))
+            b.setIconSize(QSize(26, 26))
             b.setToolTip(ayuda)
             b.setObjectName("herramienta")
             b.clicked.connect(f)
@@ -100,8 +100,8 @@ class VentanaTablero(QWidget):
         # 4. Botón de los tres puntitos (Menú)
         menu = QToolButton()
         # NUEVO: Envolvemos la ruta en QIcon()
-        menu.setIcon(QIcon(ruta_recurso("iconos", "dots-three-outline-bold.svg")))
-        menu.setIconSize(QSize(20, 20))
+        menu.setIcon(iconos.icono("dots-three-outline-bold.svg"))
+        menu.setIconSize(QSize(26, 26))
         menu.setObjectName("herramienta")
         menu.clicked.connect(lambda: self.menu_global().exec(menu.mapToGlobal(menu.rect().topLeft())))
         h.addWidget(menu)
@@ -112,10 +112,16 @@ class VentanaTablero(QWidget):
     def _crear_panel(self):
         self.panel = QFrame(self)
         self.panel.setObjectName("panelFlotante")
-        self.panel.setFixedWidth(250)
+        self.panel.setFixedWidth(268)
         lay = QVBoxLayout(self.panel)
+        lay.setContentsMargins(14, 14, 6, 14)
         self.pila = QStackedWidget()
-        lay.addWidget(self.pila)
+        self.scroll = QScrollArea()          # si el panel no cabe en la ventana, aparece un scroll
+        self.scroll.setWidgetResizable(True)
+        self.scroll.setFrameShape(QFrame.Shape.NoFrame)
+        self.scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.scroll.setWidget(self.pila)
+        lay.addWidget(self.scroll)
         self.p_notas, self.p_pincel = PanelNotas(), PanelPincel()
         self.p_texto, self.p_figuras, self.p_lienzo = PanelTexto(), PanelFiguras(), PanelLienzo()
         # el panel de texto y el de lienzo comparten página con la de selección
@@ -186,6 +192,11 @@ class VentanaTablero(QWidget):
         self.panel.setVisible(pagina is not None)
         if pagina is not None:
             self.pila.setCurrentWidget(pagina)
+            # el alto del panel lo manda SOLO la página visible (las demás no cuentan)
+            for w in self.paginas.values():
+                w.setSizePolicy(QSizePolicy.Policy.Preferred if w is pagina else QSizePolicy.Policy.Ignored,
+                                QSizePolicy.Policy.Preferred if w is pagina else QSizePolicy.Policy.Ignored)
+            self.scroll.verticalScrollBar().setValue(0)
         self._herramienta_ui = hid
         self._colocar()
 
@@ -257,7 +268,9 @@ class VentanaTablero(QWidget):
     def _colocar(self):
         self.barra.adjustSize()
         self.barra.move((self.width() - self.barra.width()) // 2, self.height() - self.barra.height() - 16)
-        self.panel.adjustSize()
+        alto_max = max(120, self.height() - 32)
+        alto = min(self.pila.sizeHint().height() + 28, alto_max)    # tan alto como su contenido
+        self.panel.setFixedHeight(alto)
         self.panel.move(self.width() - self.panel.width() - 16, 16)
         self.barra.raise_()
         self.panel.raise_()

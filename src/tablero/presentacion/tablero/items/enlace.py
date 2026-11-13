@@ -1,6 +1,7 @@
 from PySide6.QtCore import QRectF, QUrl, Qt
 from PySide6.QtGui import QColor, QDesktopServices, QFont
 
+from ... import iconos
 from .base import ItemBase, fuente_de
 from .. import dialogos
 
@@ -18,8 +19,10 @@ class ItemEnlace(ItemBase):
         f.setBold(True)
         painter.setFont(f)
         painter.setPen(QColor(self.p.get("color_texto", "#0D47A1")))
-        painter.drawText(QRectF(12, 6, r.width() - 24, r.height() / 2), Qt.AlignmentFlag.AlignVCenter,
-                         "🔗 " + self.p.get("titulo", "Enlace"))
+        painter.drawPixmap(12, int(r.height() / 4 - 9 + 6), 18, 18,
+                           iconos.pixmap("link-simple-horizontal-bold.svg", self.p.get("color_texto", "#0D47A1")))
+        painter.drawText(QRectF(36, 6, r.width() - 48, r.height() / 2), Qt.AlignmentFlag.AlignVCenter,
+                         self.p.get("titulo", "Enlace"))
         pequena = QFont(f)
         pequena.setBold(False)
         pequena.setPointSize(max(8, f.pointSize() - 3))

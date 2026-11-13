@@ -179,3 +179,69 @@ def test_contexto(tmp_path, con, usuario):
     ctx.guardar_widgets_notas([{"id": "1", "texto": "hola"}])
     assert ctx.widgets_notas()[0]["texto"] == "hola"
     assert len(ctx.calendario.listar_calendarios()) == 1
+
+
+# ---------------------------------------------------------------- acceso con correo y recuperación
+def test_registro_con_correo_y_login_por_correo(con):
+    s = ServicioAcceso(RepoUsuarios(con))
+    u = s.registrar("Marta", "secreto", "Marta@Correo.com", "secreto")
+    assert u.correo == "Marta@Correo.com"
+    assert s.entrar("marta@correo.com", "secreto").id == u.id      # por correo (sin distinguir mayúsculas)
+    assert s.entrar("MARTA", "secreto").id == u.id                 # por nombre de usuario
+    with pytest.raises(ErrorAcceso):
+        s.registrar("Otra", "secreto", "marta@correo.com")          # correo repetido
+    for nombre, clave, correo, conf in (("Ana", "secreto", "no-es-correo", None),
+                                        ("Ana", "secreto", "a@b.com", "distinta"),
+                                        ("a@b", "secreto", None, None),
+                                        ("Ana", "abc", None, None)):
+        with pytest.raises(ErrorAcceso):
+            s.registrar(nombre, clave, correo, conf)
+
+
+def test_recuperar_clave(con):
+    s = ServicioAcceso(RepoUsuarios(con))
+    u = s.registrar("Luis", "vieja123", "luis@correo.com")
+    codigo = s.nuevo_codigo_recuperacion(u.id)
+    assert len(codigo) == 14 and codigo.count("-") == 2
+    with pytest.raises(ErrorAcceso):                                # código incorrecto
+        s.recuperar_clave("luis", "AAAA-AAAA-AAAA", "nueva123", "nueva123")
+    with pytest.raises(ErrorAcceso):                                # confirmación distinta
+        s.recuperar_clave("luis", codigo, "nueva123", "otra")
+    # acepta correo o usuario, minúsculas y sin guiones
+    usuario, nuevo = s.recuperar_clave("LUIS@correo.com", codigo.lower().replace("-", " "), "nueva123", "nueva123")
+    assert usuario.id == u.id and nuevo != codigo
+    assert s.entrar("luis", "nueva123").id == u.id
+    with pytest.raises(ErrorAcceso):
+        s.entrar("luis", "vieja123")
+    with pytest.raises(ErrorAcceso):                                # el código usado ya no sirve
+        s.recuperar_clave("luis", codigo, "otra1234", "otra1234")
+    s.recuperar_clave("luis", nuevo, "tercera1", "tercera1")        # el nuevo sí
+
+
+def test_recuperar_limita_intentos_y_no_revela_si_existe(con):
+    s = ServicioAcceso(RepoUsuarios(con))
+    s.registrar("Eva", "clave1", "eva@correo.com")                  # sin código de recuperación (cuenta antigua)
+    mensajes = set()
+    for _ in range(5):
+        with pytest.raises(ErrorAcceso) as e:
+            s.recuperar_clave("eva", "AAAA-BBBB-CCCC", "nueva123", "nueva123")
+        mensajes.add(str(e.value))
+    with pytest.raises(ErrorAcceso) as e:
+        s.recuperar_clave("nadie", "AAAA-BBBB-CCCC", "nueva123", "nueva123")
+    assert str(e.value) in mensajes                                 # mismo mensaje que usuario real
+    with pytest.raises(ErrorAcceso) as e:                           # a la sexta, bloqueo
+        s.recuperar_clave("eva", "AAAA-BBBB-CCCC", "nueva123", "nueva123")
+    assert "Demasiados intentos" in str(e.value)
+
+
+def test_migracion_002_conserva_usuarios_existentes(tmp_path):
+    from tablero.infraestructura.base_datos import migrador
+    c = abrir_conexion(":memory:")
+    primera = sorted(migrador.CARPETA.glob("001_*.sql"))[0]
+    c.executescript(primera.read_text(encoding="utf-8"))
+    c.execute("PRAGMA user_version = 1")
+    c.execute("INSERT INTO usuarios (id, nombre, hash_clave, creado_en) VALUES ('1','Vieja',NULL,'x')")
+    c.commit()
+    migrador.migrar(c)
+    assert c.execute("PRAGMA user_version").fetchone()[0] == 2
+    assert RepoUsuarios(c).por_nombre("vieja")[0].id == "1"

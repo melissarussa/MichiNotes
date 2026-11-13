@@ -1,9 +1,8 @@
 """Ventana principal y arranque de la aplicación."""
 import sys
-from pathlib import Path
 
-from PySide6.QtCore import QTimer, QUrl, QSize
-from PySide6.QtGui import QAction, QDesktopServices,QIcon
+from PySide6.QtCore import QSize, Qt, QTimer
+from PySide6.QtGui import QAction, QIcon
 from PySide6.QtWidgets import (QApplication, QFileDialog, QMainWindow, QMenu, QMessageBox, QStackedWidget, QStyle,
                                QSystemTrayIcon, QToolBar)
 from .. import config
@@ -15,13 +14,14 @@ from ..infraestructura import respaldo
 from ..infraestructura.base_datos.conexion import abrir_conexion
 from ..infraestructura.base_datos.migrador import migrar
 from ..infraestructura.repositorios.sqlite_usuarios import RepoUsuarios
+from . import iconos
 from .calendario.vista_semanal import VistaSemanal
+from .estilo import aplicar_estilo
 from .login import DialogoLogin
 from .panel_trabajo import PanelTrabajo
 from .ventana_tablero import VentanaTablero
 from .widgets_escritorio import WidgetNota
 
-ESTILOS = Path(__file__).parent / "estilos"
 ATAJOS = """<b>Atajos de teclado</b><br><br>
 V seleccionar · N notas · B pincel · E borrador · S figuras · I imagen · T texto<br>
 Ctrl+Z deshacer · Ctrl+Y rehacer · Ctrl+D duplicar · Supr eliminar · Ctrl+A seleccionar todo<br>
@@ -37,8 +37,10 @@ class VentanaPrincipal(QMainWindow):
         self.setWindowTitle("Tablero Digital")
         self.resize(1200, 760)
         self.widgets: list[WidgetNota] = []
+        self.cerrar_sesion_pedido = False     # True si se cerró para volver al login (no para salir)
 
         self.pila = QStackedWidget()
+        self.pila.setObjectName("pilaPrincipal")
         self.setCentralWidget(self.pila)
         self.trabajo = PanelTrabajo(ctx)
         self.tablero = VentanaTablero(ctx, self.crear_menu)
@@ -49,7 +51,8 @@ class VentanaPrincipal(QMainWindow):
 
         barra = QToolBar("Navegación")
         barra.setMovable(False)
-        barra.setIconSize(QSize(24, 24)) 
+        barra.setIconSize(QSize(28, 28))
+        barra.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextBesideIcon)   # icono + nombre de la función
         self.addToolBar(barra)
 
 # 1. Agregamos el nombre del archivo a cada tupla
@@ -61,16 +64,14 @@ class VentanaPrincipal(QMainWindow):
 
         # 2. Bucle para los 3 botones principales
         for archivo_icono, texto, funcion in acciones:
-            icono = QIcon(ruta_recurso("iconos", archivo_icono))
-            accion = QAction(icono, texto, self)
+            accion = QAction(iconos.icono(archivo_icono), texto, self)
             accion.triggered.connect(funcion)
             barra.addAction(accion)
 
         # 3. El Separador y el Menú van AFUERA del bucle (¡esto arregla el desastre!)
         barra.addSeparator()
         
-        icono_menu = QIcon(ruta_recurso("iconos", "dots-three-outline-bold.svg"))
-        accion_menu = QAction(icono_menu, "Menú", self)
+        accion_menu = QAction(iconos.icono("dots-three-outline-bold.svg"), "Menú", self)
         accion_menu.triggered.connect(lambda: self.crear_menu().exec(self.cursor().pos()))
         barra.addAction(accion_menu)
 
@@ -86,7 +87,6 @@ class VentanaPrincipal(QMainWindow):
         self.timer.start()
         QTimer.singleShot(1500, self.revisar_avisos)
 
-        QApplication.instance().setStyleSheet((ESTILOS / "claro.qss").read_text(encoding="utf-8"))
         for d in ctx.widgets_notas():
             self._mostrar_widget(d)
         self.ver_tableros()
@@ -106,31 +106,41 @@ class VentanaPrincipal(QMainWindow):
 
     def crear_menu(self) -> QMenu:
         m = QMenu(self)
-        accion_tableros = QAction(QIcon(ruta_recurso("iconos", "chalkboard-simple-bold.svg")), "Panel de trabajo", self)
+        accion_tableros = QAction(iconos.icono("chalkboard-simple-bold.svg"), "Panel de trabajo", self)
         accion_tableros.triggered.connect(self.ver_tableros)
         m.addAction(accion_tableros)
-        accion_calendario = QAction(QIcon(ruta_recurso("iconos","calendar-dots-bold.svg")),"Calendario", self)
+        accion_calendario = QAction(iconos.icono("calendar-dots-bold.svg"),"Calendario", self)
         accion_calendario.triggered.connect(self.ver_calendario)
         m.addAction(accion_calendario)
-        accion_widget = QAction(QIcon(ruta_recurso("iconos", "note-pencil-bold.svg")),"Nuevo Widget", self)
+        accion_widget = QAction(iconos.icono("note-pencil-bold.svg"),"Nuevo Widget", self)
         accion_widget.triggered.connect(self.nuevo_widget_notas)
         m.addAction(accion_widget)
-        accion_guardar = QAction(QIcon(ruta_recurso("iconos","floppy-disk-bold.svg")),"Guardar", self)
+        accion_guardar = QAction(iconos.icono("floppy-disk-bold.svg"),"Guardar", self)
         accion_guardar.triggered.connect(self.hacer_respaldo)
         m.addAction(accion_guardar)
-        accion_restaurar = QAction(QIcon(ruta_recurso("iconos","recycle-bold.svg")),"Restaurar guardado", self)
+        accion_restaurar = QAction(iconos.icono("recycle-bold.svg"),"Restaurar guardado", self)
         accion_restaurar.triggered.connect(self.restaurar_respaldo)
         m.addAction(accion_restaurar)
         m.addSeparator()
-        accion_atajos = QAction(QIcon(ruta_recurso("iconos","keyboard-bold.svg")),"Atajos de teclado", self)
-        accion_atajos.triggered.connect(lambda: QDesktopServices.openUrl(QUrl.fromLocalFile(str(self.ctx.carpeta_datos))))
+        accion_atajos = QAction(iconos.icono("keyboard-bold.svg"),"Atajos de teclado", self)
+        accion_atajos.triggered.connect(lambda: QMessageBox.information(self, "Atajos", ATAJOS))
         m.addAction(accion_atajos)
-        accion_salir = QAction(QIcon(ruta_recurso("iconos","power-bold.svg")),"Salir", self)
+        accion_sesion = QAction(iconos.icono("lock-key-bold.svg"), "Cerrar sesión", self)
+        accion_sesion.triggered.connect(self.cerrar_sesion)
+        m.addAction(accion_sesion)
+        accion_salir = QAction(iconos.icono("power-bold.svg"),"Salir", self)
         accion_salir.triggered.connect(self.close)
         m.addAction(accion_salir)
 
         return m
     
+    # ---- sesión
+    def cerrar_sesion(self):
+        if QMessageBox.question(self, "Cerrar sesión", "¿Desea cerrar la sesión de "
+                                f"{self.ctx.usuario.nombre}?") == QMessageBox.StandardButton.Yes:
+            self.cerrar_sesion_pedido = True
+            self.close()
+
     # ---- respaldo
     def hacer_respaldo(self):
         destino, _ = QFileDialog.getSaveFileName(self, "Guardar respaldo",
@@ -183,24 +193,33 @@ class VentanaPrincipal(QMainWindow):
     def closeEvent(self, ev):
         for w in list(self.widgets):
             w.close()
-        self.ctx.con.close()
-        super().closeEvent(ev)
+        if self.bandeja:
+            self.bandeja.hide()      # si no, queda un icono por cada sesión iniciada
+        self.timer.stop()
+        super().closeEvent(ev)   # la conexión la cierra ejecutar(): sigue abierta para el siguiente login
 
 
 def ejecutar() -> int:
     app = QApplication(sys.argv)
     app.setApplicationName(config.NOMBRE_APP)
+    aplicar_estilo(app)   # fuente Dongle + estilo plano (antes de crear cualquier ventana)
     rutaLogo = ruta_recurso("iconos", "logo.png")
     app.setWindowIcon(QIcon(rutaLogo))
     carpeta = config.carpeta_datos()
     con = abrir_conexion(config.ruta_db(carpeta))
     migrar(con)
     acceso = ServicioAcceso(RepoUsuarios(con))
-    dlg = DialogoLogin(acceso)
-    if not dlg.exec():
-        return 0
-    ctx = Contexto(con, carpeta, dlg.usuario)
-    ventana = VentanaPrincipal(ctx)
-    ventana.show()
-
-    return app.exec()
+    while True:
+        dlg = DialogoLogin(acceso)
+        if not dlg.exec():
+            break
+        ctx = Contexto(con, carpeta, dlg.usuario)
+        ventana = VentanaPrincipal(ctx)
+        ventana.show()
+        app.exec()                      # vuelve aquí al cerrar la ventana principal
+        pedido = ventana.cerrar_sesion_pedido
+        ventana.deleteLater()
+        if not pedido:                  # cerró la ventana / "Salir": termina la app
+            break                       # (si pidió cerrar sesión, se repite el login)
+    con.close()
+    return 0

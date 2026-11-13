@@ -1,7 +1,9 @@
 """Panel de trabajo: lista de tableros con búsqueda, crear, renombrar, eliminar y restaurar."""
-from PySide6.QtCore import Signal
+from PySide6.QtCore import QSize, Signal
 from PySide6.QtWidgets import (QHBoxLayout, QInputDialog, QLineEdit, QListWidget, QListWidgetItem, QMessageBox,
                                QPushButton, QVBoxLayout, QWidget, QLabel)
+
+from . import iconos
 
 
 class PanelTrabajo(QWidget):
@@ -19,14 +21,17 @@ class PanelTrabajo(QWidget):
         self.buscar.setPlaceholderText("Buscar tablero…")
         self.buscar.textChanged.connect(self.cargar)
         fila.addWidget(self.buscar, 1)
-        for etq, f in (("＋ Nuevo tablero", self.nuevo), ("Renombrar", self.renombrar), ("Eliminar", self.eliminar),
-                       ("Eliminados…", self.ver_eliminados)):
-            b = QPushButton(etq)
+        for etq, ic, f in (("Nuevo tablero", "plus-bold.svg", self.nuevo), ("Renombrar", "pencil-simple-line-bold.svg", self.renombrar),
+                           ("Eliminar", "trash-simple-bold.svg", self.eliminar), ("Eliminados", "recycle-bold.svg", self.ver_eliminados)):
+            b = QPushButton(" " + etq)
+            b.setIcon(iconos.icono(ic, normal=iconos.COLOR_ACTIVO))
+            b.setIconSize(QSize(22, 22))
             b.clicked.connect(f)
             fila.addWidget(b)
         lay.addLayout(fila)
         self.lista = QListWidget()
         self.lista.itemDoubleClicked.connect(lambda it: self.abrir.emit(it.data(256)))
+        self.lista.setIconSize(QSize(26, 26))
         lay.addWidget(self.lista)
         lay.addWidget(QLabel("Doble clic sobre un tablero para abrirlo."))
         self.cargar()
@@ -34,7 +39,7 @@ class PanelTrabajo(QWidget):
     def cargar(self, *_):
         self.lista.clear()
         for t in self.ctx.tableros.listar(self.buscar.text()):
-            it = QListWidgetItem(f"📋  {t.nombre}    ·  {t.actualizado_en[:10]}")
+            it = QListWidgetItem(iconos.icono("chalkboard-simple-bold.svg"), f"{t.nombre}    ·  {t.actualizado_en[:10]}")
             it.setData(256, t.id)
             self.lista.addItem(it)
 

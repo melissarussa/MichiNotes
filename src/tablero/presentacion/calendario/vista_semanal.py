@@ -1,13 +1,21 @@
 """Calendario semanal (LUN–DOM, 8 AM–6 PM) con mini calendario y lista de calendarios, como el mockup."""
 from datetime import date, datetime, timedelta
 
-from PySide6.QtCore import QDate, Signal
+from PySide6.QtCore import QDate, QSize, Signal
 from PySide6.QtGui import QBrush, QColor
 from PySide6.QtWidgets import (QCalendarWidget, QCheckBox, QHBoxLayout, QHeaderView, QInputDialog, QLabel,
                                QPushButton, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget, QAbstractItemView)
 
 from ...dominio.calendario import Evento
+from .. import iconos
 from .dialogo_evento import DialogoEvento
+
+def _boton(texto: str, icono: str) -> QPushButton:
+    b = QPushButton((" " + texto) if texto else "")
+    b.setIcon(iconos.icono(icono, normal=iconos.COLOR_ACTIVO))
+    b.setIconSize(QSize(20, 20))
+    return b
+
 
 DIAS = ["LUN", "MAR", "MIÉ", "JUE", "VIE", "SÁB", "DOM"]
 H0, H1 = 8, 18      # horas visibles (8:00 a 18:59)
@@ -33,34 +41,10 @@ class VistaSemanal(QWidget):
         # --- CAMBIOS EN EL MINI CALENDARIO ---
         self.mini = QCalendarWidget()
         self.mini.setMaximumWidth(260)
-        self.mini.setGridVisible(True)
+        self.mini.setGridVisible(False)
         # Ocultar la columna de números de semana (44, 45, 46...)
         self.mini.setVerticalHeaderFormat(QCalendarWidget.VerticalHeaderFormat.NoVerticalHeader)
-        # Aplicar un estilo limpio para que no se vea oscuro
-        self.mini.setStyleSheet("""
-            QCalendarWidget QWidget { 
-                alternate-background-color: #f0f0f0; 
-                background-color: #ffffff;
-                color: #333333;
-            }
-            QCalendarWidget QAbstractItemView:enabled {
-                background-color: #ffffff;
-                color: #333333;
-                selection-background-color: #0078D7;
-                selection-color: white;
-            }
-            QCalendarWidget QWidget#qt_calendar_navigationbar {
-                background-color: #e0e0e0;
-                color: #333333;
-            }
-            QCalendarWidget QToolButton {
-                color: #333333;
-                background-color: transparent;
-            }
-            QCalendarWidget QSpinBox {
-                color: #333333;
-            }
-        """)
+        # el estilo (colores planos) viene de estilos/claro.qss
         # -------------------------------------
         
         self.mini.selectionChanged.connect(self._mini_cambio)
@@ -68,7 +52,7 @@ class VistaSemanal(QWidget):
         izq.addWidget(QLabel("<b>Calendarios</b>"))
         self.caja_cals = QVBoxLayout()
         izq.addLayout(self.caja_cals)
-        nuevo = QPushButton("＋ Nuevo calendario")
+        nuevo = _boton("Nuevo calendario", "plus-bold.svg")
         nuevo.clicked.connect(self._nuevo_calendario)
         izq.addWidget(nuevo)
         izq.addStretch()
@@ -78,14 +62,14 @@ class VistaSemanal(QWidget):
         nav = QHBoxLayout()
         self.titulo = QLabel()
         self.titulo.setObjectName("tituloPanel")
-        ant, hoy, sig = QPushButton("◀"), QPushButton("Hoy"), QPushButton("▶")
+        ant, hoy, sig = _boton("", "caret-left-bold.svg"), QPushButton("Hoy"), _boton("", "caret-right-bold.svg")
         ant.clicked.connect(lambda: self.mover(-7))
         sig.clicked.connect(lambda: self.mover(7))
         hoy.clicked.connect(self.ir_hoy)
         nav.addWidget(self.titulo, 1)
         for b in (ant, hoy, sig):
             nav.addWidget(b)
-        nuevo_ev = QPushButton("＋ Evento")
+        nuevo_ev = _boton("Evento", "plus-bold.svg")
         nuevo_ev.clicked.connect(self._evento_nuevo_ahora)
         nav.addWidget(nuevo_ev)
         der.addLayout(nav)
@@ -100,24 +84,6 @@ class VistaSemanal(QWidget):
         self.tabla.verticalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         self.tabla.cellDoubleClicked.connect(self._doble_clic)
         
-        # Corregir los cuadros negros de la tabla (esquina superior izquierda y cabeceras)
-        self.tabla.setStyleSheet("""
-            QTableWidget {
-                background-color: #ffffff;
-                border: 1px solid #d0d0d0;
-            }
-            QHeaderView::section {
-                background-color: #f5f5f5;
-                color: #333333;
-                border: 1px solid #d0d0d0;
-                padding: 4px;
-            }
-            /* Esta es la parte que arregla el cuadro negro de arriba a la izquierda */
-            QTableWidget QTableCornerButton::section {
-                background-color: #f5f5f5;
-                border: 1px solid #d0d0d0;
-            }
-        """)
         # -----------------------
 
         der.addWidget(self.tabla, 1)

@@ -4,6 +4,9 @@ from PySide6.QtCore import QPointF, QRectF, Qt
 from PySide6.QtGui import QBrush, QColor, QFont, QPainter, QPen
 from PySide6.QtWidgets import QGraphicsItem
 
+from ... import iconos
+from ...estilo import ESCALA_FUENTE, FUENTE
+
 ASA = 14   # tamaño del asa de redimensionar
 
 ALINEACION = {"izquierda": Qt.AlignmentFlag.AlignLeft, "centro": Qt.AlignmentFlag.AlignHCenter,
@@ -11,8 +14,12 @@ ALINEACION = {"izquierda": Qt.AlignmentFlag.AlignLeft, "centro": Qt.AlignmentFla
 
 
 def fuente_de(props: dict, base: int = 12) -> QFont:
-    f = QFont(props["fuente"]) if props.get("fuente") else QFont()
-    f.setPointSize(int(props.get("tamano", base)))
+    familia = props.get("fuente") or FUENTE        # por defecto: Dongle
+    f = QFont(familia)
+    tam = float(props.get("tamano", base))
+    if familia == FUENTE:
+        tam *= ESCALA_FUENTE                       # Dongle es muy pequeña: se agranda para que se lea igual
+    f.setPointSizeF(tam)
     f.setBold(bool(props.get("negrita")))
     f.setItalic(bool(props.get("cursiva")))
     f.setUnderline(bool(props.get("subrayado")))
@@ -71,8 +78,8 @@ class ItemBase(QGraphicsItem):
         if self.isSelected():
             self.decorar(painter)
         if self.e.bloqueado:
-            painter.setPen(QColor("#888888"))
-            painter.drawText(self.rect().adjusted(0, 0, -4, -2), Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignBottom, "🔒")
+            painter.drawPixmap(int(self.rect().right() - 22), int(self.rect().bottom() - 22), 18, 18,
+                               iconos.pixmap("lock-key-bold.svg", iconos.COLOR_ICONO))
 
     def dibujar(self, painter) -> None:
         raise NotImplementedError
