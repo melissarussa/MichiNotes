@@ -1,311 +1,131 @@
-# MichiNotes — Tablero Digital
+# MichiNotes
 
-Aplicación de escritorio **offline** para organizar ideas en tableros visuales: notas, listas, enlaces, texto, figuras, dibujo a mano alzada e imágenes sobre un lienzo infinito, más un calendario semanal con avisos y widgets de notas que se quedan en el escritorio.
+Tu tablero digital para organizar ideas: un lienzo infinito donde puedes poner notas, listas, enlaces, textos, figuras, dibujos e imágenes, y un calendario para no olvidar nada.
 
-Proyecto de **Prácticas II**. Desarrollado en **Python + PySide6 (Qt) + SQLite**. No necesita internet ni servidores: todo se guarda en el computador del usuario.
-
----
-
-## Contenido
-
-1. [Características](#características)
-2. [Requisitos](#requisitos)
-3. [Instalación](#instalación)
-   - [Opción A — Usar el ejecutable (usuario final, Windows)](#opción-a--usar-el-ejecutable-usuario-final-windows)
-   - [Opción B — Ejecutar desde el código fuente (Windows, Linux, macOS)](#opción-b--ejecutar-desde-el-código-fuente-windows-linux-macos)
-   - [Opción C — Generar el ejecutable `.exe` (Windows)](#opción-c--generar-el-ejecutable-exe-windows)
-4. [Primer uso](#primer-uso)
-5. [Guía rápida de uso](#guía-rápida-de-uso)
-6. [Atajos de teclado](#atajos-de-teclado)
-7. [Dónde se guardan los datos y respaldos](#dónde-se-guardan-los-datos-y-respaldos)
-8. [Pruebas automáticas](#pruebas-automáticas)
-9. [Estructura del proyecto](#estructura-del-proyecto)
-10. [Tecnologías](#tecnologías)
-11. [Solución de problemas](#solución-de-problemas)
+Funciona sin internet y todo lo que haces se guarda solo en tu computador.
 
 ---
 
-## Características
+## Empezar
 
-**Cuenta y acceso**
-- Crear cuenta con nombre de usuario, correo y contraseña.
-- Iniciar sesión con **correo o nombre de usuario**.
-- Recuperar la contraseña con un **código de recuperación** de un solo uso (se muestra al crear la cuenta; funciona sin conexión).
-- Las contraseñas se guardan cifradas (hash con Argon2); nunca en texto plano.
-- Cerrar sesión y entrar con otro usuario sin cerrar la aplicación.
+1. Abre **MichiNotes.exe** (doble clic).
+   Si Windows muestra *"Windows protegió su PC"*, pulsa **Más información** y luego **Ejecutar de todas formas**. Es normal con programas nuevos.
+2. La primera vez verás **Crear cuenta**. Escribe un nombre de usuario, tu correo y una contraseña (dos veces).
+3. **Guarda tu código de recuperación.** Aparece una sola vez al crear la cuenta; cópialo o anótalo en un lugar seguro. Lo necesitarás si algún día olvidas tu contraseña.
+4. Pulsa **Continuar** y ya estás dentro.
 
-**Panel de tableros**
-- Crear, buscar, renombrar y eliminar tableros.
-- Los tableros eliminados van a una papelera de la que se pueden restaurar.
+### Iniciar sesión
+Escribe tu **correo o nombre de usuario** y tu contraseña, y pulsa **Ingresar**.
 
-**Lienzo del tablero**
-- Zoom y desplazamiento; fondo con cuadrícula, puntos o liso.
-- **Notas**, **listas con casillas**, **enlaces** y **texto** con formato (fuente, tamaño, negrita, cursiva, subrayado, alineación).
-- **Figuras** (con rotación a 90° o libre).
-- **Pincel** con 4 tipos de trazo (duro redondo, resaltador, suave texturizado y óleo) y **borrador**.
-- **Imágenes** importadas desde el computador.
-- Capas (traer al frente / enviar al fondo), bloquear, duplicar y eliminar elementos.
-- **Deshacer / rehacer** (hasta 200 pasos) y **papelera** de elementos por tablero.
+### ¿Olvidó su contraseña?
+1. En la pantalla de inicio pulsa **¿olvidó su contraseña?**
+2. Escribe tu usuario o correo, tu **código de recuperación** y una contraseña nueva.
+3. Al terminar entras directamente con la contraseña nueva y se te muestra un **código nuevo**: el anterior deja de servir, así que guarda este.
 
-**Calendario**
-- Vista semanal por horas, mini calendario y varios calendarios con color.
-- Eventos con título, descripción, fecha, hora de inicio y fin, color y **tablero asociado**.
-- **Avisos** (5 min, 15 min, 30 min, 1 hora o 1 día antes) mediante notificación del sistema.
+> Sin el código de recuperación no se puede restablecer una contraseña olvidada. Por eso es importante guardarlo.
 
-**Widgets de escritorio**
-- Notas adhesivas siempre visibles, sin bordes, que recuerdan su texto y su posición.
-
-**Respaldo**
-- Guardar una copia de toda la información en un archivo `.db` y restaurarla cuando se necesite (incluye las imágenes importadas).
+### Cerrar sesión
+Abre el menú **☰** y elige **Cerrar sesión**. Volverás a la pantalla de inicio, donde puede entrar otra persona con su propia cuenta. Cada cuenta tiene sus propios tableros y calendario.
 
 ---
 
-## Requisitos
+## Tus tableros
 
-| | Ejecutable (Opción A) | Código fuente (Opciones B y C) |
+Al entrar ves tu **panel de trabajo** con todos tus tableros. Desde allí puedes:
+
+- **Crear** un tablero nuevo.
+- **Buscar** uno por su nombre.
+- **Renombrar** o **eliminar** un tablero. Los eliminados se pueden **restaurar** desde la papelera de tableros.
+- **Abrir** un tablero con doble clic.
+
+La barra superior te lleva entre **Tableros**, **Tablero actual** y **Calendario**.
+
+---
+
+## Trabajar en un tablero
+
+La barra flotante de abajo tiene las herramientas. Pasa el mouse sobre cada botón para ver su nombre.
+
+| Herramienta | Tecla | Para qué sirve |
 |---|---|---|
-| Sistema operativo | Windows 10 u 11 (64 bits) | Windows 10/11, Linux o macOS |
-| Python | No hace falta | **3.10 o superior** (3.11–3.13 recomendado) |
-| Internet | No | Solo durante la instalación de librerías |
-| Espacio en disco | ≈ 150 MB | ≈ 600 MB (entorno virtual + librerías) |
+| Seleccionar | **V** | Elegir y mover elementos. Arrastra en un espacio vacío para seleccionar varios. |
+| Mano | **H** | Mover la vista del tablero sin tocar los elementos. |
+| Notas | **N** | Crear notas, listas con casillas o enlaces. |
+| Pincel | **B** | Dibujar a mano (4 estilos de trazo, con color y grosor). |
+| Borrador | **E** | Borrar trazos de dibujo. |
+| Figuras | **S** | Rectángulo, elipse, triángulo, rombo, línea y flecha. |
+| Imagen | **I** | Insertar una imagen desde tu computador. |
+| Texto | **T** | Escribir texto suelto, sin cuadro. |
 
-Librerías de Python (en `requirements.txt`): `PySide6`, `argon2-cffi`, `pytest`.
+Junto a ellas están **Deshacer**, **Rehacer**, la **Papelera** del tablero y el **zoom**.
 
----
+### Cosas que puedes hacer con los elementos
+- **Editar:** doble clic sobre una nota, lista, texto o enlace.
+- **Mover y cambiar de tamaño:** arrastra el elemento, o el cuadrito de su esquina inferior derecha.
+- **Girar una figura:** selecciónala y arrastra el círculo que aparece sobre ella (con **Shift** gira de 15° en 15°). También puedes usar **R** (90° a la derecha) y **Shift+R** (90° a la izquierda), o los botones del panel de Figuras.
+- **Menú del clic derecho:** editar, duplicar, traer al frente, enviar al fondo, bloquear (para que no se mueva) o eliminar.
+- **Crear una nota rápida:** doble clic en un espacio vacío.
+- **Papelera:** lo que eliminas no se pierde; puedes restaurarlo o borrarlo para siempre desde la papelera del tablero.
 
-## Instalación
+### Mover el tablero y hacer zoom
+- Con la herramienta **Mano (H)**, arrastra con el clic izquierdo.
+- Sin cambiar de herramienta, arrastra con la **rueda del mouse presionada**.
+- **Ctrl + rueda** acerca y aleja. **Ctrl + 0** vuelve al 100 %.
 
-### Opción A — Usar el ejecutable (usuario final, Windows)
+### Atajos de teclado
 
-Es la forma más simple: no hay que instalar Python ni nada más.
-
-1. Obtenga el archivo **`MichiNotes.exe`** (se genera con la Opción C; está en la carpeta `dist`).
-2. Cópielo a la carpeta que prefiera (Escritorio, Documentos, un USB…).
-3. Haga **doble clic** sobre `MichiNotes.exe`.
-
-> **Aviso de Windows (SmartScreen):** como el programa no está firmado digitalmente, Windows puede mostrar "Windows protegió su PC". Pulse **Más información → Ejecutar de todas formas**. Solo ocurre la primera vez.
-
-> **Importante:** el `.exe` es portable, no es un instalador. No crea accesos directos ni entradas en "Programas". Si desea un acceso directo, haga clic derecho sobre el `.exe` → *Enviar a → Escritorio (crear acceso directo)*.
-
-Los datos del usuario **no** quedan junto al `.exe`, sino en su carpeta personal de Windows (ver [Dónde se guardan los datos](#dónde-se-guardan-los-datos-y-respaldos)). Por eso puede mover o actualizar el `.exe` sin perder información.
-
-### Opción B — Ejecutar desde el código fuente (Windows, Linux, macOS)
-
-1. **Instale Python 3.10 o superior** desde <https://www.python.org/downloads/>.
-   En Windows, durante la instalación marque la casilla **"Add python.exe to PATH"**.
-2. **Abra una terminal** dentro de la carpeta del proyecto (la que contiene `main.py`).
-3. **Cree un entorno virtual** (una "caja" aislada para las librerías del proyecto):
-
-   ```
-   python -m venv .venv
-   ```
-4. **Actívelo:**
-
-   ```
-   .venv\Scripts\activate          # Windows (CMD o PowerShell)
-   source .venv/bin/activate       # Linux / macOS
-   ```
-   Verá `(.venv)` al inicio de la línea de la terminal.
-5. **Instale las librerías:**
-
-   ```
-   pip install -r requirements.txt
-   ```
-6. **Inicie la aplicación:**
-
-   ```
-   python main.py
-   ```
-
-Para volver a abrirla otro día solo repita los pasos 2, 4 y 6 (el entorno y las librerías ya quedaron instalados).
-
-> En PowerShell, si el paso 4 muestra un error de "ejecución de scripts deshabilitada", ejecute una vez `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` o use CMD en su lugar.
-
-> En Linux, si la ventana no abre y aparece un error sobre `xcb`, instale las librerías del sistema que usa Qt: `sudo apt install libxcb-cursor0 libxkbcommon-x11-0`.
-
-### Opción C — Generar el ejecutable `.exe` (Windows)
-
-Sirve para entregar la aplicación a otras personas sin que tengan que instalar Python. Requiere Python 3.10+ instalado (paso 1 de la Opción B).
-
-1. Abra la carpeta del proyecto.
-2. Haga **doble clic en `construir_exe.bat`**.
-3. El script hace todo solo (tarda unos minutos):
-   1. crea el entorno virtual,
-   2. instala las librerías y PyInstaller,
-   3. genera el ejecutable,
-   4. verifica que exista y abre la carpeta de resultado.
-4. El archivo final queda en **`dist\MichiNotes.exe`**. Ese es el único archivo que hay que entregar.
-
-Equivalente manual, con el entorno virtual activo:
-
-```
-pip install pyinstaller
-pyinstaller --noconfirm --clean MichiNotes.spec
-```
-
-Si el `.exe` no abre y necesita ver el error, ejecute `construir_exe.bat debug`: genera `dist\MichiNotes_debug.exe`, que muestra una consola con los mensajes.
-
----
-
-## Primer uso
-
-1. Al abrir la aplicación aparece la pantalla de acceso. Pulse **"¿No tiene cuenta? Crear cuenta"**.
-2. Escriba **nombre de usuario** (mínimo 2 caracteres, sin «@»), **correo**, **contraseña** (mínimo 4 caracteres) y su confirmación.
-3. Se muestra el **código de recuperación**. **Anótelo o cópielo** ("Copiar código") y guárdelo en un lugar seguro: es la única forma de restablecer la contraseña si la olvida. Al usarlo se genera uno nuevo.
-4. Pulse **Continuar**: entra al panel de tableros.
-
-En los siguientes usos basta con escribir correo o usuario y contraseña, y pulsar **Ingresar**.
-
-**¿Olvidó la contraseña?** En la pantalla de acceso pulse "¿olvidó su contraseña?", escriba su usuario o correo, el código de recuperación y la nueva contraseña.
-
----
-
-## Guía rápida de uso
-
-**Barra superior:** *Tableros* (panel de trabajo) · *Tablero actual* · *Calendario* · *Menú*.
-
-**Tableros**
-1. En *Tableros* pulse **Nuevo tablero**, escriba un nombre y se abrirá.
-2. Para abrir uno existente, haga **doble clic** sobre él. Puede filtrarlos con el buscador.
-3. **Renombrar**, **Eliminar** y **Eliminados** (papelera, para restaurar) están en la misma barra.
-
-**Dentro de un tablero**
-- La barra de herramientas permite elegir: seleccionar, mano, notas, pincel, borrador, figuras, imagen y texto. Al elegir una herramienta aparece a la derecha su panel de opciones (color, tipo, tamaño, etc.).
-- **Notas / listas / enlaces:** elija el tipo y el color, y haga clic en el lienzo para crearla. Doble clic para editarla. También puede hacer **doble clic en un espacio vacío** para crear una nota rápida.
-- **Clic derecho** sobre un elemento: menú con editar, girar, duplicar, traer al frente, enviar al fondo, bloquear y eliminar (a la papelera).
-- **Lienzo:** con nada seleccionado, el panel *Lienzo* permite cambiar entre cuadrícula, puntos o liso, y el color de fondo.
-- **Papelera del tablero:** los elementos eliminados se pueden restaurar, borrar para siempre o vaciar.
-- Todo se guarda automáticamente.
-
-**Calendario**
-- **Evento** (o doble clic en una celda de hora) abre el formulario del evento; ahí se elige calendario, aviso, color y tablero asociado.
-- Use las flechas y **Hoy** para moverse entre semanas, o el mini calendario para saltar a una fecha.
-- **Nuevo calendario** crea calendarios adicionales (por ejemplo "Estudio", "Personal").
-- Los avisos llegan como notificación del sistema mientras la aplicación esté abierta.
-
-**Widgets de escritorio**
-- *Menú → Nuevo Widget* crea una nota adhesiva flotante. Se arrastra desde cualquier punto, guarda su texto sola y se cierra con la **X**. Al volver a abrir la aplicación reaparecen donde quedaron.
-
-**Menú (☰)**
-
-| Opción | Qué hace |
+| Acción | Atajo |
 |---|---|
-| Panel de trabajo | Ir a la lista de tableros |
-| Calendario | Ir al calendario |
-| Nuevo Widget | Crear una nota de escritorio |
-| Guardar | Crear un respaldo de toda la información |
-| Restaurar guardado | Reemplazar la información actual por la de un respaldo |
-| Atajos de teclado | Mostrar la lista de atajos |
-| Cerrar sesión | Volver a la pantalla de acceso |
-| Salir | Cerrar la aplicación |
+| Deshacer / Rehacer | Ctrl+Z / Ctrl+Y |
+| Duplicar | Ctrl+D |
+| Eliminar lo seleccionado | Supr o Retroceso |
+| Seleccionar todo | Ctrl+A |
+| Girar figura | R / Shift+R |
+| Volver a Seleccionar | Esc |
+
+(Las teclas de las herramientas no cambian la herramienta mientras estás escribiendo en un campo de texto.)
+
+### Personalizar el lienzo
+Con la herramienta **Seleccionar** activa, el panel de la derecha te deja elegir el estilo del fondo (cuadrícula, puntos o liso) y su color. También puedes crear aquí un **widget de notas** (ver más abajo).
 
 ---
 
-## Atajos de teclado
+## Calendario
 
-| Atajo | Acción |
-|---|---|
-| `V` | Seleccionar |
-| `H` | Mano (mover la vista sin tocar elementos) |
-| `N` | Notas |
-| `B` | Pincel |
-| `E` | Borrador |
-| `S` | Figuras |
-| `I` | Imagen |
-| `T` | Texto |
-| `Esc` | Quitar selección y volver a Seleccionar |
-| `Ctrl + Z` | Deshacer |
-| `Ctrl + Y` / `Ctrl + Shift + Z` | Rehacer |
-| `Ctrl + D` | Duplicar |
-| `Supr` / `Retroceso` | Eliminar lo seleccionado |
-| `Ctrl + A` | Seleccionar todo |
-| `Ctrl + rueda del mouse` | Zoom |
-| `Ctrl + 0` | Zoom al 100 % |
-| Botón central del mouse (arrastrar) | Mover el lienzo |
-| `R` / `Shift + R` | Girar la figura 90° (derecha / izquierda) |
-| Arrastrar el círculo sobre una figura | Girar libremente (con `Shift`, de 15° en 15°) |
+Pulsa **Calendario** en la barra superior para ver tu semana, de 12 AM a 11 PM (la vista abre cerca de las 7 AM; desplázate para ver el resto).
 
-Las teclas de herramienta no se activan mientras se escribe dentro de un cuadro de texto.
+- **Doble clic en una hora vacía** para crear un evento; doble clic sobre un evento para editarlo o eliminarlo.
+- Cada evento puede tener título, descripción, fecha, horas, color, un **aviso** unos minutos antes y un tablero asociado.
+- Usa las flechas y **Hoy** para moverte entre semanas, o el mini calendario.
+- Cuando llega la hora del aviso, MichiNotes te muestra una notificación mientras la app esté abierta.
 
 ---
 
-## Dónde se guardan los datos y respaldos
+## Widgets de notas en el escritorio
 
-La información **no** está dentro de la carpeta del programa. Se guarda en la carpeta de datos de la aplicación de cada usuario del sistema:
-
-| Sistema | Carpeta |
-|---|---|
-| Windows | `%APPDATA%\MichiNotes\` (escriba eso en la barra de direcciones del Explorador) |
-| Linux | `~/.local/share/MichiNotes/` |
-| macOS | `~/Library/Application Support/MichiNotes/` |
-
-Dentro está `tablero.db` (base de datos SQLite con usuarios, tableros, elementos, calendario y configuración) y la carpeta `recursos/` con las imágenes importadas. Si no encuentra el archivo, revise si dentro de esa carpeta hay otra subcarpeta `MichiNotes`.
-
-**Hacer un respaldo:** *Menú → Guardar* → elija dónde guardar el archivo `.db`. Junto a él se crea una carpeta `<nombre>_recursos` con las imágenes. **Guarde ambos juntos.**
-
-**Restaurar un respaldo:** *Menú → Restaurar guardado* → elija el `.db` (con su carpeta `_recursos` al lado). Esto **reemplaza todo** el contenido actual por el del respaldo; la aplicación pide confirmación antes.
-
-**Pasar la información a otro computador:** haga un respaldo, copie el `.db` y su carpeta `_recursos` al otro equipo, abra MichiNotes allí, cree una cuenta cualquiera y use *Restaurar guardado*.
-
-**Desinstalar:** elimine `MichiNotes.exe` (o la carpeta del proyecto). Si además quiere borrar toda la información, elimine la carpeta de datos indicada arriba.
+Desde el menú **☰ → Nuevo Widget** puedes crear una notita que flota sobre tu escritorio, siempre visible. Se arrastra a donde quieras y guarda lo que escribes automáticamente.
 
 ---
 
-## Pruebas automáticas
+## Guardar y restaurar tus datos
 
-Las pruebas verifican la base de datos y los servicios sin abrir ninguna ventana. Con el entorno virtual activo:
+Tus tableros se guardan solos mientras trabajas. Para tener una copia de seguridad:
 
-```
-pytest -q
-```
-
-Resultado esperado: `20 passed`.
+- **☰ → Guardar:** crea un archivo de respaldo (`.db`) donde tú elijas. Cópialo a una USB o a la nube si quieres.
+- **☰ → Restaurar guardado:** recupera todo desde un respaldo. Ojo: **reemplaza todo lo que hay actualmente** por el contenido del respaldo.
 
 ---
 
-## Estructura del proyecto
+## Preguntas frecuentes
 
-```
-MichiNotes/
-├── main.py                  Punto de entrada
-├── requirements.txt         Librerías necesarias
-├── MichiNotes.spec          Configuración de PyInstaller
-├── construir_exe.bat        Genera dist\MichiNotes.exe en Windows
-├── recursos/                Iconos, logo, imagen de acceso y fuente Dongle
-├── tests/                   Pruebas automáticas (pytest)
-└── src/tablero/
-    ├── config.py            Rutas y carpeta de datos
-    ├── dominio/             Entidades puras: usuario, tablero, elementos, calendario
-    ├── aplicacion/          Casos de uso: servicios, comandos (deshacer/rehacer), bus de eventos
-    ├── infraestructura/     SQLite, migraciones, repositorios, seguridad (hash) y respaldos
-    └── presentacion/        Interfaz Qt: login, panel de tableros, lienzo, calendario, widgets
-```
+**¿Se pierde mi información si actualizo la app?**
+No. Tus datos viven en la carpeta de datos de tu usuario de Windows, separada del programa.
 
-La arquitectura está separada en capas: la interfaz (`presentacion`) llama a los casos de uso (`aplicacion`), que trabajan con entidades (`dominio`) y guardan mediante repositorios (`infraestructura`). La base de datos se crea y actualiza sola al abrir la aplicación mediante los scripts de `infraestructura/base_datos/migraciones/`.
+**¿Puedo usarla en otro computador?**
+Sí: haz un respaldo con **Guardar** y llévalo al otro equipo. Allí abre MichiNotes, crea una cuenta cualquiera y usa **Restaurar guardado**; después cierra sesión e inicia con tu cuenta de siempre (el respaldo incluye tus cuentas).
 
----
+**Borré algo sin querer.**
+Prueba **Ctrl+Z**. Si ya pasó mucho tiempo, busca el elemento en la **Papelera** del tablero.
 
-## Tecnologías
-
-- **Python 3.10+**
-- **PySide6** (Qt for Python): interfaz gráfica, lienzo (`QGraphicsScene`), bandeja del sistema.
-- **SQLite**: base de datos local en un único archivo.
-- **argon2-cffi**: cifrado de contraseñas.
-- **pytest**: pruebas automáticas.
-- **PyInstaller**: empaquetado como ejecutable de Windows.
-- Fuente **Dongle** e iconos **Phosphor** incluidos en `recursos/`.
-
----
-
-## Solución de problemas
-
-| Problema | Solución |
-|---|---|
-| `python` no se reconoce como comando | Reinstale Python marcando **"Add python.exe to PATH"**, o use `py -3` en lugar de `python` en Windows. |
-| `pip install` falla por falta de internet o proxy | La instalación de librerías necesita conexión; conéctese y repita el comando. |
-| Windows bloquea el `.exe` | Pulse *Más información → Ejecutar de todas formas*. |
-| El `.exe` no abre y no muestra nada | Genere la versión con consola: `construir_exe.bat debug`, ábrala y lea el mensaje de error. |
-| Olvidé la contraseña y perdí el código de recuperación | No hay forma de recuperarla desde la aplicación (no usa servidor de correo). Cree una cuenta nueva; los datos de la cuenta anterior no se pueden abrir con ella. |
-| No llegan los avisos del calendario | La aplicación debe estar abierta, y las notificaciones de Windows activadas (*Configuración → Sistema → Notificaciones*). Si el sistema no tiene bandeja, el aviso aparece como ventana emergente. |
-| Las imágenes no aparecen tras restaurar un respaldo | Falta la carpeta `<nombre>_recursos` junto al `.db`; debe estar en la misma carpeta que el archivo restaurado. |
-| Error `xcb` al abrir en Linux | `sudo apt install libxcb-cursor0 libxkbcommon-x11-0` |
+**No me acuerdo de mi contraseña ni de mi código de recuperación.**
+Por seguridad no hay otra forma de restablecerla, porque la app funciona sin internet y no puede enviarte un correo. Te recomendamos guardar el código en un lugar seguro apenas crees tu cuenta.
