@@ -203,6 +203,9 @@ class PanelPincel(QWidget):
     def _set(self, **kw):
         self.estado.update(kw)
         self.cambiado.emit(dict(self.estado))
+        cambios = {k: v for k, v in kw.items() if k in ("borde", "relleno", "grosor")}
+        if cambios:
+            self.editado.emit(cambios)
 
     def _color(self, c):
         self.boton.poner(c)
@@ -247,6 +250,7 @@ class PanelTexto(QWidget):
 class PanelFiguras(QWidget):
     cambiado = Signal(dict)
     girar = Signal(float)         # grados a girar las figuras seleccionadas (+ = derecha)
+    editado = Signal(dict)        # solo lo que la persona acaba de cambiar (borde, relleno, grosor)
 
     ICONOS = {"rectangulo": "rectangle-bold.svg", "elipse": "circle-bold.svg", "triangulo": "triangle-bold.svg",
               "rombo": "diamond-bold.svg", "linea": "line-segment-bold.svg", "flecha": "arrow-down-right-bold.svg"}
@@ -292,7 +296,9 @@ class PanelFiguras(QWidget):
         hg.addWidget(izq)
         hg.addWidget(der)
         lay.addWidget(_fila("Girar", giro))
-        lay.addWidget(QLabel("Clic en el lienzo para colocarla. Para girar una figura, arrastra el círculo que aparece sobre ella."))
+        ayuda = QLabel("Clic en el lienzo para colocarla. Para girarla, arrastra el círculo que aparece sobre ella.")
+        ayuda.setWordWrap(True)       # sin esto, el texto largo ensancha el panel y esconde los controles
+        lay.addWidget(ayuda)
         lay.addStretch()
 
     def _set(self, **kw):

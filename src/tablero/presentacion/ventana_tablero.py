@@ -139,6 +139,7 @@ class VentanaTablero(QWidget):
         self.p_pincel.cambiado.connect(lambda d: self.opciones.update(pincel=d))
         self.p_figuras.cambiado.connect(lambda d: self.opciones.update(figura=d))
         self.p_figuras.girar.connect(self.escena.girar_seleccion)
+        self.p_figuras.editado.connect(self._formato_figura)
         self.p_texto.cambiado.connect(self._formato_texto)
         self.p_lienzo.estilo_cambiado.connect(lambda v: self._config_lienzo(lienzo=v))
         self.p_lienzo.fondo_cambiado.connect(lambda v: self._config_lienzo(fondo=v))
@@ -230,6 +231,12 @@ class VentanaTablero(QWidget):
         for it in self.escena.items_tablero():
             if it.e.tipo in ("nota", "lista", "enlace"):
                 self.ctx.servicio.editar_propiedades(it.e.id, color=c)
+
+    def _formato_figura(self, d: dict):
+        """Borde, relleno y grosor también se aplican a las figuras seleccionadas (no solo a las nuevas)."""
+        for it in self.escena.items_tablero():
+            if it.e.tipo == "figura" and not it.e.bloqueado:
+                self.ctx.servicio.editar_propiedades(it.e.id, **d)
 
     def _formato_texto(self, d: dict):
         self.opciones["texto"].update(d)
